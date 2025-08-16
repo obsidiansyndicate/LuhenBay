@@ -25,11 +25,6 @@ button:hover{background-color:#ff1a1a;}
     input, select, button{max-width:100%;}
 }
 </style>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-
 </head>
 <body>
 <div class="container">
@@ -81,77 +76,55 @@ button:hover{background-color:#ff1a1a;}
 </div>
 
 <script>
-// Firebase Config (replace with your Firebase project)
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-// Login/Register
+// Local Storage Users and Login
 function signUp(){
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(email, password)
-    .then(userCredential => { alert("Account created!"); showShop(); })
-    .catch(error => { alert(error.message); });
+    const email=document.getElementById("email").value;
+    const password=document.getElementById("password").value;
+    if(!email||!password){ alert("Fill both fields"); return; }
+    let users=JSON.parse(localStorage.getItem("users"))||{};
+    if(users[email]){ alert("User already exists"); return; }
+    users[email]=password;
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Account created!");
+    loginUser(email);
 }
 
 function signIn(){
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    auth.signInWithEmailAndPassword(email, password)
-    .then(userCredential => { alert("Logged in!"); showShop(); })
-    .catch(error => { alert(error.message); });
+    const email=document.getElementById("email").value;
+    const password=document.getElementById("password").value;
+    let users=JSON.parse(localStorage.getItem("users"))||{};
+    if(users[email]&&users[email]===password){
+        alert("Logged in!");
+        loginUser(email);
+    }else{ alert("Invalid email or password"); }
 }
 
-// User & Cart
-let cart={};
-let loginHistory=[];
+function loginUser(email){
+    localStorage.setItem("currentUser", email);
+    let history=JSON.parse(localStorage.getItem("loginHistory"))||[];
+    history.push({email:email,time:new Date().toLocaleString()});
+    localStorage.setItem("loginHistory", JSON.stringify(history));
+    showShop();
+    loadLoginHistory();
+}
 
-// Products Data
-const productsData = {
+// Products and Cart
+let cart={};
+const productsData={
     "spotify":[
-        {name:"Spotify Premium - 1 month", price:35},
-        {name:"Spotify Premium - 2 months", price:50},
-        {name:"Spotify Premium - 3 months", price:70},
-        {name:"Spotify Premium - 4 months", price:85},
-        {name:"Spotify Premium - 6 months", price:99},
-        {name:"Spotify Premium - 12 months", price:135}
+        {name:"Spotify Premium - 1 month", price:35},{name:"Spotify Premium - 2 months", price:50},{name:"Spotify Premium - 3 months", price:70},{name:"Spotify Premium - 4 months", price:85},{name:"Spotify Premium - 6 months", price:99},{name:"Spotify Premium - 12 months", price:135}
     ],
     "netflix":[
-        {name:"Netflix Shared Profile - 1 month", price:45},
-        {name:"Netflix Shared Profile - 2 months", price:65},
-        {name:"Netflix Shared Profile - 3 months", price:80},
-        {name:"Netflix Shared Profile - 12 months", price:110},
-        {name:"Netflix Solo Profile - 1 month", price:85},
-        {name:"Netflix Solo Profile - 2 months", price:120},
-        {name:"Netflix Solo Profile - 3 months", price:165},
-        {name:"Netflix Solo Profile - 12 months", price:220},
-        {name:"Netflix Solo Account - Full Warranty", price:300}
+        {name:"Netflix Shared Profile - 1 month", price:45},{name:"Netflix Shared Profile - 2 months", price:65},{name:"Netflix Shared Profile - 3 months", price:80},{name:"Netflix Shared Profile - 12 months", price:110},{name:"Netflix Solo Profile - 1 month", price:85},{name:"Netflix Solo Profile - 2 months", price:120},{name:"Netflix Solo Profile - 3 months", price:165},{name:"Netflix Solo Profile - 12 months", price:220},{name:"Netflix Solo Account - Full Warranty", price:300}
     ],
     "disney":[
-        {name:"Disney Plus Shared Profile - 1 month", price:35},
-        {name:"Disney Plus Shared Profile - 2 months", price:50},
-        {name:"Disney Plus Shared Profile - 3 months", price:75},
-        {name:"Disney Plus Shared Profile - 12 months", price:110},
-        {name:"Disney Plus Solo Profile - 1 month", price:65},
-        {name:"Disney Plus Solo Profile - 2 months", price:100},
-        {name:"Disney Plus Solo Profile - 3 months", price:135},
-        {name:"Disney Plus Solo Profile - 12 months", price:199}
+        {name:"Disney Plus Shared Profile - 1 month", price:35},{name:"Disney Plus Shared Profile - 2 months", price:50},{name:"Disney Plus Shared Profile - 3 months", price:75},{name:"Disney Plus Shared Profile - 12 months", price:110},{name:"Disney Plus Solo Profile - 1 month", price:65},{name:"Disney Plus Solo Profile - 2 months", price:100},{name:"Disney Plus Solo Profile - 3 months", price:135},{name:"Disney Plus Solo Profile - 12 months", price:199}
     ],
     "live_sisi":[
-        {name:"PH Based Live Sisi", price:100},
-        {name:"US Based Live Sisi", price:200}
+        {name:"PH Based Live Sisi", price:100},{name:"US Based Live Sisi", price:200}
     ]
 };
 
-// Show shop after login
 function showShop(){
     document.getElementById("login-section").style.display="none";
     document.getElementById("products-section").style.display="block";
@@ -159,67 +132,50 @@ function showShop(){
     document.getElementById("history-section").style.display="block";
     loadProducts();
     loadCart();
-    loadLoginHistory();
 }
 
-// Load products
 function loadProducts(){
     const container=document.getElementById("products");
     container.innerHTML="";
-    for(const category in productsData){
-        productsData[category].forEach((p,index)=>{
+    for(const cat in productsData){
+        productsData[cat].forEach((p,index)=>{
             const div=document.createElement("div");
             div.className="product-card";
-            div.innerHTML=`
-                <b>${p.name}</b>
-                Price: ₱${p.price} <br>
-                <button onclick="addToCart('${category}-${index}')">Add to Cart</button>
-            `;
+            div.innerHTML=`<b>${p.name}</b>Price: ₱${p.price}<br><button onclick="addToCart('${cat}-${index}')">Add to Cart</button>`;
             container.appendChild(div);
         });
     }
 }
 
-// Add to cart
 function addToCart(key){
-    const [category,index]=key.split("-");
-    const product=productsData[category][index];
+    const [cat,index]=key.split("-");
+    const product=productsData[cat][index];
     if(cart[product.name]) cart[product.name].quantity++;
     else cart[product.name]={...product, quantity:1};
     alert(product.name+" added to cart!");
     loadCart();
 }
 
-// Load cart
 function loadCart(){
     const container=document.getElementById("cart");
     container.innerHTML="";
     let total=0;
     for(const name in cart){
         const item=cart[name];
-        container.innerHTML+=`${item.name} x ${item.quantity} - ₱${item.price * item.quantity}<br>`;
-        total+=item.price * item.quantity;
+        container.innerHTML+=`${item.name} x ${item.quantity} - ₱${item.price*item.quantity}<br>`;
+        total+=item.price*item.quantity;
     }
     container.innerHTML+=`<b>Total: ₱${total}</b>`;
 }
 
-// Checkout
 function checkout(){
-    if(Object.keys(cart).length===0){ alert("Cart is empty!"); return;}
+    if(Object.keys(cart).length===0){ alert("Cart is empty!"); return; }
     const payment=document.getElementById("payment-method").value;
-    alert(
-        `Order Confirmed!\n` +
-        `Payment Method: ${payment}\n\n` +
-        `Please send your GCash payment to 09818002271 (R.M).\n` +
-        `No refund policy applies.\n` +
-        `Send screenshot & order confirmation to @lucianvamps or @henrylakshitt.`
-    );
+    alert(`Order Confirmed!\nPayment Method: ${payment}\nSend GCash to 09818002271 (R.M)\nNo refund policy applies.\nSend screenshot to @lucianvamps or @henrylakshitt`);
 }
 
-// Buyer Paid
 function buyerPaid(){
-    if(Object.keys(cart).length===0){ alert("Cart is empty!"); return;}
-    
+    if(Object.keys(cart).length===0){ alert("Cart is empty!"); return; }
     alert("Payment submitted! Send screenshot to @lucianvamps or @henrylakshitt.");
     cart={};
     loadCart();
@@ -228,31 +184,19 @@ function buyerPaid(){
 }
 
 // Wheel of Fortune
-const wheelOptions = [
-    "Better luck next time",
-    "₱20",
-    "1 Live CC",
-    "10% discount on your next order",
-    "Better luck next time"
-];
-
+const wheelOptions=["Better luck next time","₱20","1 Live CC","10% discount on your next order","Better luck next time"];
 function spinWheel(){
-    const randIndex = Math.floor(Math.random() * wheelOptions.length);
-    const prize = wheelOptions[randIndex];
-    document.getElementById("wheel-result").innerText = prize;
+    const randIndex=Math.floor(Math.random()*wheelOptions.length);
+    document.getElementById("wheel-result").innerText=wheelOptions[randIndex];
 }
 
-// Login history
+// Login History
 function loadLoginHistory(){
     const container=document.getElementById("login-history");
     container.innerHTML="";
-    auth.onAuthStateChanged(user=>{
-        if(user){
-            loginHistory.push({email:user.email, time:new Date().toLocaleString()});
-            loginHistory.forEach((h,index)=>{
-                container.innerHTML+=`${index+1}. ${h.email} at ${h.time}<br>`;
-            });
-        }
+    let history=JSON.parse(localStorage.getItem("loginHistory"))||[];
+    history.forEach((h,i)=>{
+        container.innerHTML+=`${i+1}. ${h.email} at ${h.time}<br>`;
     });
 }
 </script>
