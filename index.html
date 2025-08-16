@@ -1,0 +1,213 @@
+<html>
+        <head><title>Downloaded HTML</title></head>
+        <body>
+            <pre style="white-space: pre-wrap; word-wrap: break-word;"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuhenBay</title>
+<style>
+    /* Reset & Body */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#121212; color:#f0f0f0; margin:0; padding:0; }
+    h1,h2,h3{text-align:center; margin:10px 0;}
+    .container{max-width:1200px; margin:auto; padding:20px;}
+
+    /* Sections */
+    .section{background:#1f1f1f; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0 0 15px #000;}
+
+    /* Inputs & Buttons */
+    input, select{padding:10px 14px; margin:5px 0; border-radius:8px; border:none; outline:none; width:100%; max-width:300px;}
+    button{padding:10px 18px; margin:5px 0; border:none; border-radius:8px; background-color:#ff4d4d; color:white; cursor:pointer; font-weight:bold; transition:0.3s; width:100%; max-width:200px;}
+    button:hover{background-color:#ff1a1a;}
+
+    /* Products Grid */
+    #products{display:flex; flex-wrap:wrap; justify-content:center; gap:15px;}
+    .product-card{background:#2a2a2a; padding:15px; border-radius:12px; width:250px; box-shadow:0 0 10px #000; display:flex; flex-direction:column; justify-content:space-between;}
+    .product-card b{font-size:18px; margin-bottom:10px;}
+
+    /* Cart */
+    #cart{background:#2a2a2a; padding:15px; border-radius:12px; box-shadow:0 0 10px #000;}
+    #checkout-section{margin-top:15px;}
+
+    /* Landing */
+    #landing{text-align:center; margin:50px 0;}
+    
+    /* Responsive */
+    @media(max-width:600px){
+        .product-card{width:90%;}
+        input, select, button{max-width:100%;}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Landing -->
+    <div id="landing">
+        <h1>Welcome to LuhenBay</h1>
+        <p>Do you already have an account?</p>
+        <button onclick="showSignUp()">Sign Up</button>
+        <button onclick="showSignIn()">Sign In</button>
+    </div>
+
+    <!-- Sign Up -->
+    <div class="section" id="signup-section" style="display:none;">
+        <h2>Sign Up</h2>
+        <input id="signup-username" placeholder="Username">
+        <input id="signup-password" type="password" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+    </div>
+
+    <!-- Sign In -->
+    <div class="section" id="signin-section" style="display:none;">
+        <h2>Sign In</h2>
+        <input id="signin-username" placeholder="Username">
+        <input id="signin-password" type="password" placeholder="Password">
+        <button onclick="signin()">Sign In</button>
+    </div>
+
+    <!-- Products -->
+    <div class="section" id="products-section" style="display:none;">
+        <h2>Products</h2>
+        <div id="products"></div>
+    </div>
+
+    <!-- Cart -->
+    <div class="section" id="cart-section" style="display:none;">
+        <h2>Your Cart</h2>
+        <div id="cart"></div>
+        <div id="checkout-section">
+            <h3>Select Payment Method:</h3>
+            <select id="payment-method">
+                <option value="gcash">GCash</option>
+                <option value="paypal">PayPal</option>
+                <option value="credit">Credit Card</option>
+            </select>
+            <button onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Token
+let token = "";
+
+// Products Data
+const productsData = {
+    "spotify":[
+        {name:"Spotify Premium - 1 month", price:35},
+        {name:"Spotify Premium - 2 months", price:50},
+        {name:"Spotify Premium - 3 months", price:70},
+        {name:"Spotify Premium - 4 months", price:85},
+        {name:"Spotify Premium - 6 months", price:99},
+        {name:"Spotify Premium - 12 months", price:135}
+    ],
+    "netflix":[
+        {name:"Netflix Shared Profile - 1 month", price:45},
+        {name:"Netflix Shared Profile - 2 months", price:65},
+        {name:"Netflix Shared Profile - 3 months", price:80},
+        {name:"Netflix Shared Profile - 12 months", price:110},
+        {name:"Netflix Solo Profile - 1 month", price:85},
+        {name:"Netflix Solo Profile - 2 months", price:120},
+        {name:"Netflix Solo Profile - 3 months", price:165},
+        {name:"Netflix Solo Profile - 12 months", price:220},
+        {name:"Netflix Solo Account - Full Warranty", price:300}
+    ],
+    "disney":[
+        {name:"Disney Plus Shared Profile - 1 month", price:35},
+        {name:"Disney Plus Shared Profile - 2 months", price:50},
+        {name:"Disney Plus Shared Profile - 3 months", price:75},
+        {name:"Disney Plus Shared Profile - 12 months", price:110},
+        {name:"Disney Plus Solo Profile - 1 month", price:65},
+        {name:"Disney Plus Solo Profile - 2 months", price:100},
+        {name:"Disney Plus Solo Profile - 3 months", price:135},
+        {name:"Disney Plus Solo Profile - 12 months", price:199}
+    ],
+    "live_sisi":[
+        {name:"PH Based Live Sisi", price:100},
+        {name:"US Based Live Sisi", price:200}
+    ]
+};
+
+// Show forms
+function showSignUp(){ document.getElementById("landing").style.display="none"; document.getElementById("signup-section").style.display="block";}
+function showSignIn(){ document.getElementById("landing").style.display="none"; document.getElementById("signin-section").style.display="block";}
+
+// Sign Up / Sign In dummy
+function signup(){ token="dummy"; alert("Signed up successfully!"); showShop();}
+function signin(){ token="dummy"; alert("Signed in successfully!"); showShop();}
+
+// Show shop
+function showShop(){
+    document.getElementById("signup-section").style.display="none";
+    document.getElementById("signin-section").style.display="none";
+    document.getElementById("products-section").style.display="block";
+    document.getElementById("cart-section").style.display="block";
+    document.getElementById("checkout-section").style.display="block";
+    loadProducts();
+    loadCart();
+}
+
+// Load Products
+function loadProducts(){
+    if(!token) return;
+    const container=document.getElementById("products");
+    container.innerHTML="";
+    for(const category in productsData){
+        productsData[category].forEach((p,index)=>{
+            const div=document.createElement("div");
+            div.className="product-card";
+            div.innerHTML=`
+                <b>${p.name}</b>
+                Price: ₱${p.price} <br>
+                <button onclick="addToCart('${category}-${index}')">Add to Cart</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+}
+
+// Cart
+let cart={};
+function addToCart(key){
+    const [category,index]=key.split("-");
+    const product=productsData[category][index];
+    if(cart[product.name]) cart[product.name].quantity++;
+    else cart[product.name]={...product, quantity:1};
+    alert(product.name+" added to cart!");
+    loadCart();
+}
+
+function loadCart(){
+    const container=document.getElementById("cart");
+    container.innerHTML="";
+    let total=0;
+    for(const name in cart){
+        const item=cart[name];
+        container.innerHTML+=`${item.name} x ${item.quantity} - ₱${item.price * item.quantity}<br>`;
+        total+=item.price * item.quantity;
+    }
+    container.innerHTML+=`<b>Total: ₱${total}</b>`;
+}
+
+// Checkout
+function checkout(){
+    if(Object.keys(cart).length===0){ alert("Cart is empty!"); return;}
+    const payment=document.getElementById("payment-method").value;
+    alert(
+        `Order Confirmed!\n` +
+        `Payment Method: ${payment}\n\n` +
+        `Please send your GCash payment to 09818002271 (R.M).\n` +
+        `No refund policy applies.\n` +
+        `After payment, send your order confirmation to @lucianvamps or @henrylakshitt.`
+    );
+    cart={};
+    loadCart();
+}
+</script>
+</body>
+</html></pre>
+        </body>
+    </html>
