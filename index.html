@@ -8,91 +8,111 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LuhenBay</title>
 <style>
-    /* Reset & Body */
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#121212; color:#f0f0f0; margin:0; padding:0; }
-    h1,h2,h3{text-align:center; margin:10px 0;}
-    .container{max-width:1200px; margin:auto; padding:20px;}
-
-    /* Sections */
-    .section{background:#1f1f1f; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0 0 15px #000;}
-
-    /* Inputs & Buttons */
-    input, select{padding:10px 14px; margin:5px 0; border-radius:8px; border:none; outline:none; width:100%; max-width:300px;}
-    button{padding:10px 18px; margin:5px 0; border:none; border-radius:8px; background-color:#ff4d4d; color:white; cursor:pointer; font-weight:bold; transition:0.3s; width:100%; max-width:200px;}
-    button:hover{background-color:#ff1a1a;}
-
-    /* Products Grid */
-    #products{display:flex; flex-wrap:wrap; justify-content:center; gap:15px;}
-    .product-card{background:#2a2a2a; padding:15px; border-radius:12px; width:250px; box-shadow:0 0 10px #000; display:flex; flex-direction:column; justify-content:space-between;}
-    .product-card b{font-size:18px; margin-bottom:10px;}
-
-    /* Cart */
-    #cart{background:#2a2a2a; padding:15px; border-radius:12px; box-shadow:0 0 10px #000;}
-    #checkout-section{margin-top:15px;}
-
-    /* Landing */
-    #landing{text-align:center; margin:50px 0;}
-    
-    /* Responsive */
-    @media(max-width:600px){
-        .product-card{width:90%;}
-        input, select, button{max-width:100%;}
-    }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#121212; color:#f0f0f0; margin:0; padding:0; }
+h1,h2,h3{text-align:center; margin:10px 0;}
+.container{max-width:1200px; margin:auto; padding:20px;}
+.section{background:#1f1f1f; padding:20px; margin:15px 0; border-radius:12px; box-shadow:0 0 15px #000;}
+input, select{padding:10px 14px; margin:5px 0; border-radius:8px; border:none; outline:none; width:100%; max-width:300px;}
+button{padding:10px 18px; margin:5px 0; border:none; border-radius:8px; background-color:#ff4d4d; color:white; cursor:pointer; font-weight:bold; transition:0.3s; width:100%; max-width:200px;}
+button:hover{background-color:#ff1a1a;}
+#products{display:flex; flex-wrap:wrap; justify-content:center; gap:15px;}
+.product-card{background:#2a2a2a; padding:15px; border-radius:12px; width:250px; box-shadow:0 0 10px #000; display:flex; flex-direction:column; justify-content:space-between;}
+.product-card b{font-size:18px; margin-bottom:10px;}
+#cart{background:#2a2a2a; padding:15px; border-radius:12px; box-shadow:0 0 10px #000;}
+#checkout-section{margin-top:15px;}
+@media(max-width:600px){
+    .product-card{width:90%;}
+    input, select, button{max-width:100%;}
+}
 </style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+
 </head>
 <body>
 <div class="container">
 
-    <!-- Landing -->
-    <div id="landing">
-        <h1>Welcome to LuhenBay</h1>
-        <p>Do you already have an account?</p>
-        <button onclick="showSignUp()">Sign Up</button>
-        <button onclick="showSignIn()">Sign In</button>
-    </div>
+<!-- Login / Register -->
+<div id="login-section" class="section">
+    <h1>Welcome to LuhenBay</h1>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="signIn()">Login</button>
+    <button onclick="signUp()">Sign Up</button>
+</div>
 
-    <!-- Sign Up -->
-    <div class="section" id="signup-section" style="display:none;">
-        <h2>Sign Up</h2>
-        <input id="signup-username" placeholder="Username">
-        <input id="signup-password" type="password" placeholder="Password">
-        <button onclick="signup()">Sign Up</button>
-    </div>
+<!-- Products -->
+<div class="section" id="products-section" style="display:none;">
+    <h2>Products</h2>
+    <div id="products"></div>
+</div>
 
-    <!-- Sign In -->
-    <div class="section" id="signin-section" style="display:none;">
-        <h2>Sign In</h2>
-        <input id="signin-username" placeholder="Username">
-        <input id="signin-password" type="password" placeholder="Password">
-        <button onclick="signin()">Sign In</button>
+<!-- Cart & Checkout -->
+<div class="section" id="cart-section" style="display:none;">
+    <h2>Your Cart</h2>
+    <div id="cart"></div>
+    <div id="checkout-section">
+        <h3>Select Payment Method:</h3>
+        <select id="payment-method">
+            <option value="gcash">GCash</option>
+            <option value="paypal">PayPal</option>
+            <option value="credit">Credit Card</option>
+        </select>
+        <button onclick="checkout()">Checkout</button>
+        <button onclick="buyerPaid()" style="background:#4CAF50;">Paid (I Sent Payment)</button>
     </div>
+</div>
 
-    <!-- Products -->
-    <div class="section" id="products-section" style="display:none;">
-        <h2>Products</h2>
-        <div id="products"></div>
-    </div>
+<!-- Wheel of Fortune -->
+<div class="section" id="wheel-section" style="display:none;">
+    <h2>🎉 Spin the Wheel! 🎉</h2>
+    <button onclick="spinWheel()">Spin Now</button>
+    <h3 id="wheel-result"></h3>
+</div>
 
-    <!-- Cart -->
-    <div class="section" id="cart-section" style="display:none;">
-        <h2>Your Cart</h2>
-        <div id="cart"></div>
-        <div id="checkout-section">
-            <h3>Select Payment Method:</h3>
-            <select id="payment-method">
-                <option value="gcash">GCash</option>
-                <option value="paypal">PayPal</option>
-                <option value="credit">Credit Card</option>
-            </select>
-            <button onclick="checkout()">Checkout</button>
-        </div>
-    </div>
+<!-- Login History -->
+<div class="section" id="history-section" style="display:none;">
+    <h2>Login History</h2>
+    <div id="login-history"></div>
+</div>
 
 </div>
 
 <script>
-// Token
-let token = "";
+// Firebase Config (replace with your Firebase project)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Login/Register
+function signUp(){
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => { alert("Account created!"); showShop(); })
+    .catch(error => { alert(error.message); });
+}
+
+function signIn(){
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    auth.signInWithEmailAndPassword(email, password)
+    .then(userCredential => { alert("Logged in!"); showShop(); })
+    .catch(error => { alert(error.message); });
+}
+
+// User & Cart
+let cart={};
+let loginHistory=[];
 
 // Products Data
 const productsData = {
@@ -131,28 +151,19 @@ const productsData = {
     ]
 };
 
-// Show forms
-function showSignUp(){ document.getElementById("landing").style.display="none"; document.getElementById("signup-section").style.display="block";}
-function showSignIn(){ document.getElementById("landing").style.display="none"; document.getElementById("signin-section").style.display="block";}
-
-// Sign Up / Sign In dummy
-function signup(){ token="dummy"; alert("Signed up successfully!"); showShop();}
-function signin(){ token="dummy"; alert("Signed in successfully!"); showShop();}
-
-// Show shop
+// Show shop after login
 function showShop(){
-    document.getElementById("signup-section").style.display="none";
-    document.getElementById("signin-section").style.display="none";
+    document.getElementById("login-section").style.display="none";
     document.getElementById("products-section").style.display="block";
     document.getElementById("cart-section").style.display="block";
-    document.getElementById("checkout-section").style.display="block";
+    document.getElementById("history-section").style.display="block";
     loadProducts();
     loadCart();
+    loadLoginHistory();
 }
 
-// Load Products
+// Load products
 function loadProducts(){
-    if(!token) return;
     const container=document.getElementById("products");
     container.innerHTML="";
     for(const category in productsData){
@@ -169,8 +180,7 @@ function loadProducts(){
     }
 }
 
-// Cart
-let cart={};
+// Add to cart
 function addToCart(key){
     const [category,index]=key.split("-");
     const product=productsData[category][index];
@@ -180,6 +190,7 @@ function addToCart(key){
     loadCart();
 }
 
+// Load cart
 function loadCart(){
     const container=document.getElementById("cart");
     container.innerHTML="";
@@ -201,10 +212,48 @@ function checkout(){
         `Payment Method: ${payment}\n\n` +
         `Please send your GCash payment to 09818002271 (R.M).\n` +
         `No refund policy applies.\n` +
-        `After payment, send your order confirmation to @lucianvamps or @henrylakshitt.`
+        `Send screenshot & order confirmation to @lucianvamps or @henrylakshitt.`
     );
+}
+
+// Buyer Paid
+function buyerPaid(){
+    if(Object.keys(cart).length===0){ alert("Cart is empty!"); return;}
+    
+    alert("Payment submitted! Send screenshot to @lucianvamps or @henrylakshitt.");
     cart={};
     loadCart();
+    document.getElementById("wheel-section").style.display="block";
+    alert("Back to dashboard! Spin the wheel for your reward.");
+}
+
+// Wheel of Fortune
+const wheelOptions = [
+    "Better luck next time",
+    "₱20",
+    "1 Live CC",
+    "10% discount on your next order",
+    "Better luck next time"
+];
+
+function spinWheel(){
+    const randIndex = Math.floor(Math.random() * wheelOptions.length);
+    const prize = wheelOptions[randIndex];
+    document.getElementById("wheel-result").innerText = prize;
+}
+
+// Login history
+function loadLoginHistory(){
+    const container=document.getElementById("login-history");
+    container.innerHTML="";
+    auth.onAuthStateChanged(user=>{
+        if(user){
+            loginHistory.push({email:user.email, time:new Date().toLocaleString()});
+            loginHistory.forEach((h,index)=>{
+                container.innerHTML+=`${index+1}. ${h.email} at ${h.time}<br>`;
+            });
+        }
+    });
 }
 </script>
 </body>
